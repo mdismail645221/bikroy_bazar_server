@@ -34,7 +34,8 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         const categoriesCollection = client.db("bikroyBazar645221").collection("allCategories")
-        const huaweiCollection = client.db("bikroyBazar645221").collection("huaweiPhones");
+        const userCollection = client.db("bikroyBazar645221").collection("users")
+        // const huaweiCollection = client.db("bikroyBazar645221").collection("huaweiPhones");
 
         app.get('/categories', async (req, res) => {
             const query = {};
@@ -66,6 +67,17 @@ async function run() {
         // })
 
 
+
+        // ==============> POST METHOD API SAVE INTO THE MONGODB DATABASE USER INFO ==============>
+        app.post('/users', async(req, res)=> {
+            const userInfo = req.body;
+            const result = await userCollection.insertOne(userInfo);
+            console.log(result);
+            res.send(result)
+        })
+
+
+
     }
     catch {
         (error) => {
@@ -83,3 +95,10 @@ run().catch((error) => console.log(error));
 app.listen(port, () => {
     console.log('assignment 12', port)
 })
+
+
+
+
+
+// PORT = 5000
+// MONGODB_URL = mongodb + srv://bikroyBazar645221:zVNc0wb50ZWu38Za@cluster0.cn0mdvb.mongodb.net/?retryWrites=true&w=majority

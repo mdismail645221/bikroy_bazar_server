@@ -28,14 +28,16 @@ app.get('/', (req, res) => {
 })
 
 
+
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const uri = `${process.env.MONGODB_URL}`;
+const uri = "mongodb+srv://bikroyBazar645221:zVNc0wb50ZWu38Za@cluster0.cn0mdvb.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
 async function run() {
     try {
         const categoriesCollection = client.db("bikroyBazar645221").collection("allCategories")
-        const userCollection = client.db("bikroyBazar645221").collection("users")
-        // const huaweiCollection = client.db("bikroyBazar645221").collection("huaweiPhones");
+        const usersCollection = client.db("bikroyBazar645221").collection("users")
+        const productsCollection = client.db("bikroyBazar645221").collection("products");
 
         app.get('/categories', async (req, res) => {
             const query = {};
@@ -43,38 +45,28 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/categories/:id', async (req, res) => {
-            const id = req.params.id;
-            console.log(id)
-            const filter = { _id: ObjectId(id) };
-            const result = await categoriesCollection.findOne(filter);
+        app.get('/products', async(req, res)=>{
+           const query = {};
+            const result = await productsCollection.find(query).toArray();
             res.send(result)
         })
 
-        // Modify the add Location
-        // app.get('/addLocation', async(req, res)=> {
-        //   const query = {
-        //     location: "Dhaka"
-        //   };
-        //   const options = {upsert: true};
-        //   const updateDoc = {
-        //     $set: {
-        //       Location: "Dhaka"
-        //     }
-        //   }
-        //     const result = await categoriesCollection.updateMany(query, updateDoc, options);
-        //   res.send(result)
-        // })
 
+        app.get('/products/:id', async(req, res)=>{
+           const id = req.params.id;
+           const query = {id: category_id(id)};
+           const cursor = await productsCollection.find(query).toArray()
+           console.log(cursor)
+        })
 
-
+       
         // ==============> POST METHOD API SAVE INTO THE MONGODB DATABASE USER INFO ==============>
-        app.post('/users', async(req, res)=> {
+        app.post('/users', async (req, res) => {
             const userInfo = req.body;
-            const result = await userCollection.insertOne(userInfo);
-            console.log(result);
+            console.log(userInfo);
+            const result = await usersCollection.insertOne(userInfo);
             res.send(result)
-        })
+          })
 
 
 
@@ -98,7 +90,3 @@ app.listen(port, () => {
 
 
 
-
-
-// PORT = 5000
-// MONGODB_URL = mongodb + srv://bikroyBazar645221:zVNc0wb50ZWu38Za@cluster0.cn0mdvb.mongodb.net/?retryWrites=true&w=majority

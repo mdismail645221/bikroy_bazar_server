@@ -38,6 +38,7 @@ async function run() {
         const categoriesCollection = client.db("bikroyBazar645221").collection("allCategories")
         const usersCollection = client.db("bikroyBazar645221").collection("users")
         const productsCollection = client.db("bikroyBazar645221").collection("products");
+        const bookingCollection = client.db("bikroyBazar645221").collection("bookings");
 
         app.get('/categories', async (req, res) => {
             const query = {};
@@ -59,8 +60,15 @@ async function run() {
              res.send(cursor)
         })
 
+        // ===============> buyers products booking info data seve in database  <=================//
+        app.post('/bookings', async(req, res)=> {
+            const bookingInfo = req.body;
+            const result = await bookingCollection.insertOne(bookingInfo);
+            res.send(result)
+        })
+
        
-        // ==============> POST METHOD API SAVE INTO THE MONGODB DATABASE USER INFO ==============>
+        // ==============> POST METHOD API SAVE INTO THE MONGODB DATABASE USER INFO <==============//
         app.post('/users', async (req, res) => {
             const userInfo = req.body;
             console.log(userInfo);

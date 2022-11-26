@@ -76,6 +76,14 @@ async function run() {
             res.send(result)
           })
 
+        //   admin & buyer & serler api 
+        app.get('/users/admin/:email', async(req, res)=> {
+            const email = req.params.email;
+            const query = {email: email};
+            const result = await usersCollection.findOne(query);
+            res.send(result)
+        })
+
 
 
     }

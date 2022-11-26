@@ -39,6 +39,7 @@ async function run() {
         const usersCollection = client.db("bikroyBazar645221").collection("users")
         const productsCollection = client.db("bikroyBazar645221").collection("products");
         const bookingCollection = client.db("bikroyBazar645221").collection("bookings");
+        const addProductCollection = client.db("bikroyBazar645221").collection("addProducts");
 
         app.get('/categories', async (req, res) => {
             const query = {};
@@ -84,6 +85,20 @@ async function run() {
             res.send(result)
         })
 
+
+        // ==================> sellar add a Products API method <=====================//
+
+        app.get("/addProducts", async(req, res)=>{
+            const query = {};
+            const result = await addProductCollection.find(query).toArray();
+            res.send(result)
+        })
+
+        app.post('/addProducts', async(req, res)=> {
+            const addProductsInfo = req.body;
+            const result = await addProductCollection.insertOne(addProductsInfo);
+            res.send(result)
+        })
 
 
     }

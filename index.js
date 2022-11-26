@@ -33,6 +33,28 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = "mongodb+srv://bikroyBazar645221:zVNc0wb50ZWu38Za@cluster0.cn0mdvb.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+
+
+// JWT VERIFY 
+
+async function verifyJWT (req, res, next) {
+    const authHeader = req.headers.authorization;
+    if(!authHeader){
+        return res.status(401).send("unauthorized access")
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.JWT_TOKEN, function(err, decoded){
+        if(err){
+            res.status(403).send("forbidden access")
+        }
+        req.decoded = decoded;
+        next()
+    })
+}
+
+
+
+
 async function run() {
     try {
         const categoriesCollection = client.db("bikroyBazar645221").collection("allCategories")
@@ -41,60 +63,145 @@ async function run() {
         const bookingCollection = client.db("bikroyBazar645221").collection("bookings");
         const addProductCollection = client.db("bikroyBazar645221").collection("addProducts");
 
+
+            // NOTE: MAKE SURE YOU USE VerifyAdmin after verifyJWT 
+        const verifyAdmin = async (req, res, next) => {
+        const decodedEmail = req.decoded.email;
+        // console.log(decodedEmail);
+        const query = { email: decodedEmail };
+        const user = await usersCollection.findOne(query);
+        if (user?.role !== 'admin') {
+            return res.status(403).send('forbidden access')
+        }
+        next()
+        }
+
+
+        // NOTE: MAKE SURE YOU USE VerifyAdmin after verifyJWT 
+        const verifySellar = async (req, res, next) => {
+        const decodedEmail = req.decoded.email;
+        // console.log(decodedEmail);
+        const query = { email: decodedEmail };
+        const user = await usersCollection.findOne(query);
+        if (user?.role !== 'Sellers') {
+            return res.status(403).send('forbidden access')
+        }
+        next()
+        }
+
+
+        // SIGN IN  JWT TOKEN ACCESTOKEN IN USER 
+        // ==========JWT TOKEN USERS =========//
+
+        app.get('/jwt', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            if (user) {
+                const token = jwt.sign({email}, process.env.JWT_TOKEN, {expiresIn: "10d"})
+                return res.send({ sendToken: token })
+            }
+            return res.status(403).send({ sendToken: '' })
+        })
+
+
         app.get('/categories', async (req, res) => {
             const query = {};
             const result = await categoriesCollection.find(query).toArray();
             res.send(result)
         })
 
-        app.get('/products', async(req, res)=>{
-           const query = {};
+        app.get('/products', async (req, res) => {
+            const query = {};
             const result = await productsCollection.find(query).toArray();
             res.send(result)
         })
 
 
-        app.get('/products/:id', async(req, res)=>{
+        app.get('/products/:id', async (req, res) => {
             const id = parseInt(req.params.id);
-            const query = {category_id: id};
+            const query = { category_id: id };
             const cursor = await productsCollection.find(query).toArray();
-             res.send(cursor)
+            res.send(cursor)
         })
 
         // ===============> buyers products booking info data seve in database  <=================//
-        app.post('/bookings', async(req, res)=> {
+        app.post('/bookings', async (req, res) => {
             const bookingInfo = req.body;
             const result = await bookingCollection.insertOne(bookingInfo);
             res.send(result)
         })
 
-       
+
         // ==============> POST METHOD API SAVE INTO THE MONGODB DATABASE USER INFO <==============//
-        app.post('/users', async (req, res) => {
-            const userInfo = req.body;
-            console.log(userInfo);
-            const result = await usersCollection.insertOne(userInfo);
+
+        app.get('/allusers',verifyJWT, verifyAdmin, async (req, res) => {
+            console.log(req.decoded)
+            const query = {};
+            const result = await usersCollection.find(query).toArray();
             res.send(result)
-          })
+        })
 
         //   admin & buyer & serler api 
-        app.get('/users/admin/:email', async(req, res)=> {
+        app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
-            const query = {email: email};
+            const query = { email: email };
             const result = await usersCollection.findOne(query);
             res.send(result)
         })
 
+        app.post('/users', async (req, res) => {
+            const userInfo = req.body;
+            // console.log(userInfo);
+            const query = {email: userInfo.email};
+            const sameUser = await usersCollection.findOne(query);
+            console.log("sameUser", sameUser)
+            // if(sameUser){
+            //     res.send({message: "sorry tmi age ei email diya reg korecila"})
+            // }
+            const result = await usersCollection.insertOne(userInfo);
+            res.send(result)
+        })
+
+        app.put('/users/admin/:id', async (req, res) => {
+            // const decodedEmail = req.decoded.email;
+            // const query = { email: decodedEmail };
+            // const user = await usersCollection.findOne(query);
+            // if (user?.role !== 'admin') {
+            //   return res.status(403).send({ message: 'forbidden access' })
+            // }
+
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const option = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    role: 'admin'
+                }
+            }
+            const result = await usersCollection.updateOne(filter, updateDoc, option);
+            res.send(result)
+
+        })
+
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await usersCollection.deleteOne(filter);
+            res.send(result)
+        })
+
+
 
         // ==================> sellar add a Products API method <=====================//
 
-        app.get("/addProducts", async(req, res)=>{
+        app.get("/addProducts",verifyJWT, verifySellar, async (req, res) => {
             const query = {};
             const result = await addProductCollection.find(query).toArray();
             res.send(result)
         })
 
-        app.post('/addProducts', async(req, res)=> {
+        app.post('/addProducts',verifyJWT, verifySellar, async (req, res) => {
             const addProductsInfo = req.body;
             const result = await addProductCollection.insertOne(addProductsInfo);
             res.send(result)
@@ -118,6 +225,11 @@ run().catch((error) => console.log(error));
 app.listen(port, () => {
     console.log('assignment 12', port)
 })
+
+
+
+// PORT=8000
+// JWT_TOKEN=474baf1107f530fb445ab687da8ec0651f2816bade74425e8e15ccd1040852f9f83b27ebcf4502ca09dcb111294247a9ed45f5ca141493e8b54dae9f8430c4dc
 
 
 

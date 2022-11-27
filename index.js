@@ -6,13 +6,8 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken');
 
 
-// const stripe = require('stripe')(process.env.PK_KEY);
+const stripe = require('stripe')(process.env.PK_KEY);
 // console.log(stripe)
-
-
-// pass ==> zVNc0wb50ZWu38Za
-//  user= bikroyBazar645221
-
 
 
 // middleware
@@ -38,14 +33,14 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 // JWT VERIFY 
 
-async function verifyJWT (req, res, next) {
+async function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
-    if(!authHeader){
+    if (!authHeader) {
         return res.status(401).send("unauthorized access")
     }
     const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.JWT_TOKEN, function(err, decoded){
-        if(err){
+    jwt.verify(token, process.env.JWT_TOKEN, function (err, decoded) {
+        if (err) {
             res.status(403).send("forbidden access")
         }
         req.decoded = decoded;
@@ -65,29 +60,49 @@ async function run() {
         const addProductCollection = client.db("bikroyBazar645221").collection("addProducts");
 
 
-            // NOTE: MAKE SURE YOU USE VerifyAdmin after verifyJWT 
+        // PAYMANT METHOD API
+        app.post("/create-payment-intent", async (req, res) => {
+            // return console.log(req.body)
+            const booking = req.body;
+            console.log(booking)
+            const price = booking.resalePrice;
+            const amount = price * 100;
+      
+            // Create a PaymentIntent with the order amount and currency
+            const paymentIntent = await stripe.paymentIntents.create({
+              amount: amount,
+              currency: "usd",
+              "payment_method_types": ["card"],
+            });
+            res.send({
+              clientSecret: paymentIntent.client_secret,
+            });
+          });
+
+
+        // NOTE: MAKE SURE YOU USE VerifyAdmin after verifyJWT 
         const verifyAdmin = async (req, res, next) => {
-        const decodedEmail = req.decoded.email;
-        // console.log(decodedEmail);
-        const query = { email: decodedEmail };
-        const user = await usersCollection.findOne(query);
-        if (user?.role !== 'admin') {
-            return res.status(403).send('forbidden access')
-        }
-        next()
+            const decodedEmail = req.decoded.email;
+            // console.log(decodedEmail);
+            const query = { email: decodedEmail };
+            const user = await usersCollection.findOne(query);
+            if (user?.role !== 'admin') {
+                return res.status(403).send('forbidden access')
+            }
+            next()
         }
 
 
         // NOTE: MAKE SURE YOU USE VerifyAdmin after verifyJWT 
         const verifySellar = async (req, res, next) => {
-        const decodedEmail = req.decoded.email;
-        // console.log(decodedEmail);
-        const query = { email: decodedEmail };
-        const user = await usersCollection.findOne(query);
-        if (user?.role !== 'Sellers') {
-            return res.status(403).send('forbidden access')
-        }
-        next()
+            const decodedEmail = req.decoded.email;
+            // console.log(decodedEmail);
+            const query = { email: decodedEmail };
+            const user = await usersCollection.findOne(query);
+            if (user?.role !== 'Sellers') {
+                return res.status(403).send('forbidden access')
+            }
+            next()
         }
 
 
@@ -99,7 +114,7 @@ async function run() {
             const query = { email: email };
             const user = await usersCollection.findOne(query);
             if (user) {
-                const token = jwt.sign({email}, process.env.JWT_TOKEN, {expiresIn: "10d"})
+                const token = jwt.sign({ email }, process.env.JWT_TOKEN, { expiresIn: "10d" })
                 return res.send({ sendToken: token })
             }
             return res.status(403).send({ sendToken: '' })
@@ -128,19 +143,19 @@ async function run() {
 
         // ===============> buyers products booking info data seve in database  <=================//
 
-        app.get('/bookings', async(req, res)=>{
+        app.get('/bookings', async (req, res) => {
             const email = req.query.email;
             //  console.log(email)
-            const query= {email: email};
+            const query = { email: email };
             const result = await bookingCollection.find(query).toArray();
             res.send(result)
 
         })
 
-        app.get('/bookings/payment/:id', async(req, res)=> {
+        app.get('/bookings/payment/:id', async (req, res) => {
             const id = req.params.id;
             console.log(id);
-            const query = {_id: ObjectId(id)};
+            const query = { _id: ObjectId(id) };
             const result = await bookingCollection.findOne(query);
             res.send(result)
         })
@@ -154,7 +169,7 @@ async function run() {
 
         // ==============> POST METHOD API SAVE INTO THE MONGODB DATABASE USER INFO <==============//
 
-        app.get('/allusers',verifyJWT, verifyAdmin, async (req, res) => {
+        app.get('/allusers', verifyJWT, verifyAdmin, async (req, res) => {
             console.log(req.decoded)
             const query = {};
             const result = await usersCollection.find(query).toArray();
@@ -172,7 +187,7 @@ async function run() {
         app.post('/users', async (req, res) => {
             const userInfo = req.body;
             // console.log(userInfo);
-            const query = {email: userInfo.email};
+            const query = { email: userInfo.email };
             const sameUser = await usersCollection.findOne(query);
             console.log("sameUser", sameUser)
             // if(sameUser){
@@ -214,13 +229,13 @@ async function run() {
 
         // ==================> sellar add a Products API method <=====================//
 
-        app.get("/addProducts",verifyJWT, verifySellar, async (req, res) => {
+        app.get("/addProducts", verifyJWT, verifySellar, async (req, res) => {
             const query = {};
             const result = await addProductCollection.find(query).toArray();
             res.send(result)
         })
 
-        app.post('/addProducts',verifyJWT, verifySellar, async (req, res) => {
+        app.post('/addProducts', verifyJWT, verifySellar, async (req, res) => {
             const addProductsInfo = req.body;
             const result = await addProductCollection.insertOne(addProductsInfo);
             res.send(result)
@@ -248,8 +263,4 @@ app.listen(port, () => {
 
 
 
-
-
-// PORT = 8000
-// JWT_TOKEN = 474baf1107f530fb445ab687da8ec0651f2816bade74425e8e15ccd1040852f9f83b27ebcf4502ca09dcb111294247a9ed45f5ca141493e8b54dae9f8430c4dc
 

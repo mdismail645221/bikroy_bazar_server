@@ -5,6 +5,7 @@ const cors = require('cors');
 require('dotenv').config()
 const jwt = require('jsonwebtoken');
 
+
 // const stripe = require('stripe')(process.env.PK_KEY);
 // console.log(stripe)
 
@@ -134,6 +135,14 @@ async function run() {
             const result = await bookingCollection.find(query).toArray();
             res.send(result)
 
+        })
+
+        app.get('/bookings/payment/:id', async(req, res)=> {
+            const id = req.params.id;
+            console.log(id);
+            const query = {_id: ObjectId(id)};
+            const result = await bookingCollection.findOne(query);
+            res.send(result)
         })
 
         app.post('/bookings', async (req, res) => {

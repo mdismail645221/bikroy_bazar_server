@@ -176,7 +176,7 @@ async function run() {
             res.send(result)
         })
 
-        //   admin & buyer & serler api 
+        //  Dashboard layour nav Drawer admin & buyer & serler api 
         app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
@@ -185,7 +185,7 @@ async function run() {
         })
 
         // all sellars get api method
-        app.get('/users/allsellars', async(req, res)=> {
+        app.get('/users/allsellars', verifyJWT, verifyAdmin, async(req, res)=> {
             const sellarRole = req.query.role;
             // console.log(email)
             const query = { role: sellarRole }
@@ -251,6 +251,20 @@ async function run() {
             res.send(result)
         })
 
+        app.put('/addProducts/verified/:email', async(req, res)=> {
+            const email = req.params.email;
+            console.log(email)
+            const filter = {email: email};
+            const option = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    seller: 'verified'
+                }
+            }
+            const result = await usersCollection.updateOne(filter, updateDoc, option);
+            res.send(result)
+        })
+
 
     }
     catch {
@@ -269,6 +283,10 @@ run().catch((error) => console.log(error));
 app.listen(port, () => {
     console.log('assignment 12', port)
 })
+
+
+
+module.exports = app;
 
 
 

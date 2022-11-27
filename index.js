@@ -126,6 +126,16 @@ async function run() {
         })
 
         // ===============> buyers products booking info data seve in database  <=================//
+
+        app.get('/bookings', async(req, res)=>{
+            const email = req.query.email;
+            //  console.log(email)
+            const query= {email: email};
+            const result = await bookingCollection.find(query).toArray();
+            res.send(result)
+
+        })
+
         app.post('/bookings', async (req, res) => {
             const bookingInfo = req.body;
             const result = await bookingCollection.insertOne(bookingInfo);
@@ -228,8 +238,8 @@ app.listen(port, () => {
 
 
 
-// PORT=8000
-// JWT_TOKEN=474baf1107f530fb445ab687da8ec0651f2816bade74425e8e15ccd1040852f9f83b27ebcf4502ca09dcb111294247a9ed45f5ca141493e8b54dae9f8430c4dc
+
+
 
 
 

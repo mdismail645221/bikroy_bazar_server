@@ -1,3 +1,7 @@
+// PORT = 8000
+// JWT_TOKEN = 474baf1107f530fb445ab687da8ec0651f2816bade74425e8e15ccd1040852f9f83b27ebcf4502ca09dcb111294247a9ed45f5ca141493e8b54dae9f8430c4dc
+// PK_KEY=sk_test_51M6VbvJL8msLnVWBjU3TU3kysZgJW9HYqatGtNjtjAZFR2PG3TdOlUlFIQAESQYsN4ETWnl9o61AlQ8ESlDG823B003LXmoAHe
+
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 5000;

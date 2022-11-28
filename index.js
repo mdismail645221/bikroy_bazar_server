@@ -58,13 +58,14 @@ async function run() {
         const productsCollection = client.db("bikroyBazar645221").collection("products");
         const bookingCollection = client.db("bikroyBazar645221").collection("bookings");
         const addProductCollection = client.db("bikroyBazar645221").collection("addProducts");
+        const paymentCollection = client.db("bikroyBazar645221").collection("payments");
 
 
         // PAYMANT METHOD API
         app.post("/create-payment-intent", async (req, res) => {
             // return console.log(req.body)
             const booking = req.body;
-            console.log(booking)
+            // console.log(booking)
             const price = booking.resalePrice;
             const amount = price * 100;
       
@@ -78,6 +79,24 @@ async function run() {
               clientSecret: paymentIntent.client_secret,
             });
           });
+
+        //   payment info save into database
+        app.post('/payments', async(req, res)=> {
+            const payment = req.body;
+            console.log("payment", payment)
+            const result = await paymentCollection.insertOne(payment);
+
+            const id = payment.bookingId;
+            const filter = {_id: ObjectId(id)};
+            const updateDoc= {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const updatedResult = await bookingCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
 
 
         // NOTE: MAKE SURE YOU USE VerifyAdmin after verifyJWT 

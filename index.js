@@ -185,9 +185,9 @@ async function run() {
         })
 
         // all sellars get api method
-        app.get('/users/allsellars', verifyJWT, verifyAdmin, async(req, res)=> {
+        app.get('/users/allsellars', async(req, res)=> {
             const sellarRole = req.query.role;
-            // console.log(email)
+            console.log("sellarRole", sellarRole)
             const query = { role: sellarRole }
             const result = await usersCollection.find(query).toArray();
             // console.log(result)
@@ -240,8 +240,10 @@ async function run() {
         // ==================> sellar add a Products API method <=====================//
 
         app.get("/addProducts", verifyJWT, verifySellar, async (req, res) => {
-            const query = {};
+            const email = req.query.email;
+            const query = {email: email}
             const result = await addProductCollection.find(query).toArray();
+            console.log("MyProducts", result)
             res.send(result)
         })
 
@@ -253,12 +255,12 @@ async function run() {
 
         app.put('/addProducts/verified/:email', async(req, res)=> {
             const email = req.params.email;
-            console.log(email)
+            // console.log(email)
             const filter = {email: email};
             const option = { upsert: true };
             const updateDoc = {
                 $set: {
-                    seller: 'verified'
+                    verified: true
                 }
             }
             const result = await usersCollection.updateOne(filter, updateDoc, option);

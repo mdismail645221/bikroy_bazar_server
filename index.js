@@ -263,7 +263,8 @@ async function run() {
                     verified: true
                 }
             }
-            const result = await usersCollection.updateOne(filter, updateDoc, option);
+            // const userResult = await usersCollection.updateOne(filter, updateDoc, option)
+            const result = await productsCollection.updateOne(filter, updateDoc, option);
             res.send(result)
         })
 

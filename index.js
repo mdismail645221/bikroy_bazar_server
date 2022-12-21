@@ -83,7 +83,7 @@ async function run() {
         //   payment info save into database
         app.post('/payments', async(req, res)=> {
             const payment = req.body;
-            console.log("payment", payment)
+            // console.log("payment", payment)
             const result = await paymentCollection.insertOne(payment);
 
             const id = payment.bookingId;
@@ -102,7 +102,6 @@ async function run() {
         // NOTE: MAKE SURE YOU USE VerifyAdmin after verifyJWT 
         const verifyAdmin = async (req, res, next) => {
             const decodedEmail = req.decoded.email;
-            // console.log(decodedEmail);
             const query = { email: decodedEmail };
             const user = await usersCollection.findOne(query);
             if (user?.role !== 'admin') {
@@ -115,7 +114,6 @@ async function run() {
         // NOTE: MAKE SURE YOU USE VerifyAdmin after verifyJWT 
         const verifySellar = async (req, res, next) => {
             const decodedEmail = req.decoded.email;
-            // console.log(decodedEmail);
             const query = { email: decodedEmail };
             const user = await usersCollection.findOne(query);
             if (user?.role !== 'Sellers') {
@@ -164,7 +162,6 @@ async function run() {
 
         app.get('/bookings', async (req, res) => {
             const email = req.query.email;
-            //  console.log(email)
             const query = { email: email };
             const result = await bookingCollection.find(query).toArray();
             res.send(result)
@@ -215,10 +212,8 @@ async function run() {
 
         app.post('/users', async (req, res) => {
             const userInfo = req.body;
-            // console.log(userInfo);
             const query = { email: userInfo.email };
             const sameUser = await usersCollection.findOne(query);
-            console.log("sameUser", sameUser)
             // if(sameUser){
             //     res.send({message: "sorry tmi age ei email diya reg korecila"})
             // }
@@ -274,7 +269,6 @@ async function run() {
 
         app.put('/addProducts/verified/:email', async(req, res)=> {
             const email = req.params.email;
-            // console.log(email)
             const filter = {email: email};
             const option = { upsert: true };
             const updateDoc = {

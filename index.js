@@ -63,9 +63,7 @@ async function run() {
 
         // PAYMANT METHOD API
         app.post("/create-payment-intent", async (req, res) => {
-            // return console.log(req.body)
             const booking = req.body;
-            // console.log(booking)
             const price = booking.resalePrice;
             const amount = price * 100;
       
@@ -83,7 +81,6 @@ async function run() {
         //   payment info save into database
         app.post('/payments', async(req, res)=> {
             const payment = req.body;
-            // console.log("payment", payment)
             const result = await paymentCollection.insertOne(payment);
 
             const id = payment.bookingId;
@@ -206,7 +203,6 @@ async function run() {
             console.log("sellarRole", sellarRole)
             const query = { role: sellarRole }
             const result = await usersCollection.find(query).toArray();
-            // console.log(result)
             res.send(result)
         })
 

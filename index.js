@@ -200,8 +200,8 @@ async function run() {
         // all sellars get api method
         app.get('/users/allsellars', async(req, res)=> {
             const sellarRole = req.query.role;
-            console.log("sellarRole", sellarRole)
             const query = { role: sellarRole }
+            // console.log("query", query)
             const result = await usersCollection.find(query).toArray();
             res.send(result)
         })

@@ -1,7 +1,6 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -19,5 +18,14 @@
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^4.12.0",
     "stripe": "^11.1.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mdismail645221/bikroy_bazar_server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mdismail645221/bikroy_bazar_server/issues"
+  },
+  "homepage": "https://github.com/mdismail645221/bikroy_bazar_server#readme",
+  "description": ""
 }

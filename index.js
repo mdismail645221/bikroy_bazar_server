@@ -111,6 +111,7 @@ async function run() {
         // NOTE: MAKE SURE YOU USE VerifyAdmin after verifyJWT 
         const verifySellar = async (req, res, next) => {
             const decodedEmail = req.decoded.email;
+            console.log(decodedEmail)
             const query = { email: decodedEmail };
             const user = await usersCollection.findOne(query);
             if (user?.role !== 'Sellers') {
@@ -201,7 +202,7 @@ async function run() {
         app.get('/users/allsellars', async(req, res)=> {
             const sellarRole = req.query.role;
             const query = { role: sellarRole }
-            // console.log("query", query)
+            console.log("query", query)
             const result = await usersCollection.find(query).toArray();
             res.send(result)
         })
@@ -249,15 +250,16 @@ async function run() {
 
         // ==================> sellar add a Products API method <=====================//
 
-        app.get("/addProducts", verifyJWT, verifySellar, async (req, res) => {
+        app.get("/addProducts", async (req, res) => {
             const email = req.query.email;
+            console.log(email)
             const query = {email: email}
             const result = await addProductCollection.find(query).toArray();
-            console.log("MyProducts", result)
+            // console.log("MyProducts", result)
             res.send(result)
         })
 
-        app.post('/addProducts', verifyJWT, verifySellar, async (req, res) => {
+        app.post('/addProducts', async (req, res) => {
             const addProductsInfo = req.body;
             const result = await addProductCollection.insertOne(addProductsInfo);
             res.send(result)

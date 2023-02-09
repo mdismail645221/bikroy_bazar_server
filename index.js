@@ -16,6 +16,9 @@ app.use(cors());
 app.use(express.json());
 
 
+// console.log(process.env.PORT)
+
+
 
 
 // start ====>
@@ -35,6 +38,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
+    console.log("authHeader", authHeader)
     if (!authHeader) {
         return res.status(401).send("unauthorized access")
     }
@@ -99,6 +103,7 @@ async function run() {
         // NOTE: MAKE SURE YOU USE VerifyAdmin after verifyJWT 
         const verifyAdmin = async (req, res, next) => {
             const decodedEmail = req.decoded.email;
+            // console.log(decodedEmail)
             const query = { email: decodedEmail };
             const user = await usersCollection.findOne(query);
             if (user?.role !== 'admin') {
@@ -111,7 +116,7 @@ async function run() {
         // NOTE: MAKE SURE YOU USE VerifyAdmin after verifyJWT 
         const verifySellar = async (req, res, next) => {
             const decodedEmail = req.decoded.email;
-            console.log(decodedEmail)
+            // console.log(decodedEmail)
             const query = { email: decodedEmail };
             const user = await usersCollection.findOne(query);
             if (user?.role !== 'Sellers') {
@@ -126,6 +131,7 @@ async function run() {
 
         app.get('/jwt', async (req, res) => {
             const email = req.query.email;
+            // console.log("email", email)
             const query = { email: email };
             const user = await usersCollection.findOne(query);
             if (user) {
@@ -168,7 +174,7 @@ async function run() {
 
         app.get('/bookings/payment/:id', async (req, res) => {
             const id = req.params.id;
-            console.log(id);
+            // console.log(id);
             const query = { _id: ObjectId(id) };
             const result = await bookingCollection.findOne(query);
             res.send(result)
@@ -184,7 +190,7 @@ async function run() {
         // ==============> POST METHOD API SAVE INTO THE MONGODB DATABASE USER INFO <==============//
 
         app.get('/allusers', verifyJWT, verifyAdmin, async (req, res) => {
-            console.log(req.decoded)
+            // console.log(req.decoded)
             const query = {};
             const result = await usersCollection.find(query).toArray();
             res.send(result)
@@ -201,8 +207,9 @@ async function run() {
         // all sellars get api method
         app.get('/users/allsellars', async(req, res)=> {
             const sellarRole = req.query.role;
+            // console.log(sellarRole)
             const query = { role: sellarRole }
-            console.log("query", query)
+            // console.log("query", query)
             const result = await usersCollection.find(query).toArray();
             res.send(result)
         })
@@ -252,7 +259,7 @@ async function run() {
 
         app.get("/addProducts", async (req, res) => {
             const email = req.query.email;
-            console.log(email)
+            // console.log(email)
             const query = {email: email}
             const result = await addProductCollection.find(query).toArray();
             // console.log("MyProducts", result)

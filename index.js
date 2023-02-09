@@ -29,9 +29,9 @@ app.get('/', (req, res) => {
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const uri = "mongodb+srv://bikroyBazar645221:zVNc0wb50ZWu38Za@cluster0.cn0mdvb.mongodb.net/?retryWrites=true&w=majority";
+const uri = `mongodb+srv://${process.env.MONGODB_URI_NAME}:${process.env.MONGODB_URI_PASSWORD}@cluster0.cn0mdvb.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-
+console.log(uri)
 
 
 // JWT VERIFY 
@@ -205,7 +205,7 @@ async function run() {
         })
 
         // all sellars get api method
-        app.get('/users/allsellars', async(req, res)=> {
+        app.get('/users/allsellars', verifyJWT, async(req, res)=> {
             const sellarRole = req.query.role;
             // console.log(sellarRole)
             const query = { role: sellarRole }
